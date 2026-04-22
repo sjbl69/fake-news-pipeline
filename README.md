@@ -271,6 +271,19 @@ API alternative pour récupérer des actualités internationales.
 
 ---
 
+Gestion des labels
+
+Seule la source FakeNewsNet fournit des labels fiables (fake / real).
+
+Les autres sources (News API, Reddit, NewsData.io) ne contiennent aucun label.
+
+Stratégie adoptée :
+- FakeNewsNet est utilisé pour l’entraînement supervisé
+- Les autres sources servent à enrichir le dataset
+- Ces données pourront être utilisées pour du pré-entraînement ou du semi-supervisé
+
+  
+
 #  Points de vigilance
 
 * Associer correctement texte et image
