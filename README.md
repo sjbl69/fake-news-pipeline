@@ -10,7 +10,7 @@ Projet de création d’un pipeline ETL permettant de collecter, transformer et 
 * Transformer et nettoyer les données (texte + image)
 * Stocker les données dans un format exploitable
 * Orchestrer le pipeline avec Apache Airflow
-* Construire un dataset fiable et maintenable
+* Construire un dataset fiable, traçable et maintenable
 
 ---
 
@@ -18,15 +18,15 @@ Projet de création d’un pipeline ETL permettant de collecter, transformer et 
 
 ```
 fake-news-pipeline/
-
+│
 ├── src/                    
 │   ├── extract/
 │   ├── transform/
 │   ├── load/
 │
-├── data/                    # données
-├── dags/                    # pipelines Airflow
-├── notebooks/               # exploration
+├── data/                   
+├── dags/                   
+├── notebooks/              
 │
 ├── config.py
 ├── requirements.txt
@@ -39,109 +39,177 @@ fake-news-pipeline/
 
 ##  Objectif
 
-Identifier des sources de données multimodales (texte + image) pertinentes pour entraîner un modèle de détection de fake news.
+Identifier des sources multimodales (texte + image) pertinentes pour entraîner un modèle de détection de fake news, en analysant leur qualité, leur accessibilité et leur potentiel d’utilisation.
 
 ---
 
 ##  Source 1 : News API
 
+###  Lien officiel
+
+https://newsapi.org/
+
 ###  Description
 
-API fournissant des articles d’actualité provenant de nombreuses sources internationales.
+API REST fournissant des articles d’actualité issus de nombreuses sources internationales.
 
 ###  Caractéristiques
 
-* Type de données : articles
+* Type : articles
 * Modalités :
 
-  * Texte : (titre, description)
-  * Image : (URL)
+  * Texte : oui (titre, description)
+  * Image : oui (URL, parfois absente)
 * Format : JSON
-* Langue : multilingue
-* Labels :  non disponibles
+* Langue : multilingue (majoritairement anglais)
 
-###  Méthode d’extraction
+###  Authentification
 
-* API REST avec Python (`requests`)
+* Clé API obligatoire (`apiKey`)
 
-###  Avantages
+###  Pagination
 
-* Données propres et structurées
-* Facile à utiliser
+* `page` et `pageSize`
 
-###  Limites
+###  Limites API
 
-* Pas de labels
+* Limitation du nombre de requêtes (plan gratuit)
+* Accès restreint à certaines sources
+
+###  Volume estimé
+
+* Plusieurs milliers d’articles/jour
+
+###  Images
+
+* Non garanties → filtrage nécessaire
+
+###  Licence
+
+* Usage personnel et développement autorisé
+* Redistribution brute interdite
+
+###  Labels
+
+ Aucun label fake/real
+
+ Utilisation prévue :
+
+* données “réelles”
+* enrichissement du dataset
+* mise à jour continue
 
 ---
 
 ##  Source 2 : Reddit
 
+###  Lien officiel
+
+https://www.reddit.com/dev/api/
+
 ###  Description
 
-Plateforme sociale permettant de récupérer des publications utilisateurs.
+Plateforme sociale contenant des publications texte et image, incluant potentiellement de la désinformation.
 
 ###  Caractéristiques
 
-* Type de données : posts
+* Type : posts utilisateurs
 * Modalités :
 
   * Texte : oui
-  * Image : oui
-* Format : JSON
-* Langue : anglais
-* Labels :  non disponibles
+  * Image : oui (variable)
+  * Format : JSON
 
-###  Méthode d’extraction
+###  Langue
 
-* API via `praw`
+* Principalement anglais
 
-###  Avantages
+###  Authentification
 
-* Données réalistes
-* Présence potentielle de fake news
+* OAuth via API (librairie `praw`)
 
-###  Limites
+###  Pagination
 
-* Données bruitées
-* Nécessite nettoyage
+* basée sur `after` / `limit`
+
+###  Limites API
+
+* Rate limit strict
+* restrictions sur certains contenus
+
+###  Volume estimé
+
+* Très élevé (millions de posts)
+
+### Images
+
+* Très hétérogènes
+
+###  Licence
+
+* Respect des conditions d’utilisation Reddit
+
+###  Labels
+
+ Aucun
+
+ Utilisation prévue :
+
+* données bruitées réalistes
+* détection de patterns de désinformation
 
 ---
 
 ##  Source 3 : FakeNewsNet
 
+###  Lien officiel
+
+https://github.com/KaiDMML/FakeNewsNet
+
 ###  Description
 
-Dataset académique dédié à la détection de fake news.
+Dataset académique conçu pour la détection de fake news.
 
 ###  Caractéristiques
 
-* Type de données : articles
+* Type : articles
 * Modalités :
 
   * Texte : oui
-  * Image : oui (selon cas)
+  * Image : oui (partielle)
 * Format : JSON / CSV
-* Langue : anglais
-* Labels :  disponibles (fake / real)
 
-###  Méthode d’extraction
+###  Langue
 
-* Téléchargement direct
-* Lecture avec `pandas`
+* Anglais
 
-###  Avantages
+###  Labels
 
-* Données labellisées
-* Idéal pour entraînement
+ Fake / Real
 
-### Limites
+###  Volume estimé
 
-* Dataset statique
+* Quelques milliers d’articles
+
+###  Images
+
+* Disponibilité partielle
+
+###  Licence
+
+* Usage académique / recherche
+
+ Utilisation prévue :
+
+* dataset principal d’entraînement
 
 ---
 
 ##  Source 4 : NewsData.io
+
+###  Lien officiel
+
+https://newsdata.io/
 
 ###  Description
 
@@ -149,53 +217,80 @@ API alternative pour récupérer des actualités internationales.
 
 ###  Caractéristiques
 
-* Type de données : articles
-* Modalités :
-
-  * Texte : oui
-  * Image : oui
+* Texte : oui
+* Image : oui
 * Format : JSON
 * Langue : multilingue
-* Labels :  non disponibles
 
-###  Méthode d’extraction
+###  Authentification
 
-* API REST
+* API key
+
+###  Pagination
+
+* oui
+
+###  Limites
+
+* quotas API
+
+###  Labels
+
+ Aucun
+
+ Utilisation :
+
+* source complémentaire
 
 ---
 
-##  Format de données cible
+#  Schéma de données cible
 
 ```json
 {
+  "id": "uuid",
   "title": "Titre",
   "text": "Contenu",
-  "image_url": "URL image",
-  "source": "Nom source",
-  "date": "YYYY-MM-DD",
-  "label": "fake / real / null"
+  "article_url": "...",
+  "image_url": "...",
+  "image_path": "...",
+  "source_name": "...",
+  "language": "en",
+  "published_at": "...",
+  "collected_at": "...",
+  "label": "fake / real / null",
+  "raw_source": "news_api / reddit / fakenewsnet"
 }
 ```
 
+ Ce schéma garantit :
+
+* unicité des données
+* traçabilité
+* lien texte-image fiable
+
 ---
 
-##  Points de vigilance
+#  Points de vigilance
 
 * Associer correctement texte et image
-* Conserver les métadonnées (source, date, URL)
+* Vérifier la disponibilité des images
 * Ne pas confondre opinion et désinformation
-* Vérifier les droits d’utilisation des données
+* Respecter les licences des données
+* Conserver toutes les métadonnées utiles
 
 ---
 
-##  Conclusion
+#  Conclusion
 
-Les sources sélectionnées permettent de construire un dataset :
+Les sources sélectionnées sont complémentaires :
 
-* riche
-* multimodal
-* partiellement labellisé
+* News API et NewsData.io → données réelles et mises à jour
+* Reddit → données bruitées et réalistes
+* FakeNewsNet → données labellisées
 
- Ce socle est essentiel pour entraîner un modèle de détection de fake news performant.
+ Seul FakeNewsNet permet un entraînement direct.
+ Les autres sources servent à enrichir et actualiser le dataset.
 
+---
 
