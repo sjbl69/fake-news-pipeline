@@ -5,19 +5,21 @@ import uuid
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
+# Charger les variables d'environnement
 load_dotenv()
-
-API_KEY = os.getenv("NEWS_API_KEY")
-
-if not API_KEY:
-    raise ValueError("NEWS_API_KEY manquante dans le fichier .env")
 
 URL = "https://newsapi.org/v2/top-headlines"
 
 
 def fetch_news():
+    # Charger la clé
+    api_key = os.getenv("NEWS_API_KEY")
+
+    if not api_key:
+        raise ValueError("NEWS_API_KEY manquante dans le fichier .env")
+
     params = {
-        "apiKey": API_KEY,
+        "apiKey": api_key,
         "country": "us",
         "pageSize": 10
     }
@@ -31,6 +33,7 @@ def fetch_news():
 
     data = response.json()
 
+    # Vérification API
     if data.get("status") != "ok":
         print("Erreur API :", data)
         return []
@@ -54,6 +57,7 @@ def fetch_news():
             "raw_source": "news_api"
         }
 
+        # Filtrer données exploitables
         if all([
             cleaned["title"],
             cleaned["text"],
