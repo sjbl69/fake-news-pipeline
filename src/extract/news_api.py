@@ -1,44 +1,58 @@
-import requests
 import os
 import json
 import uuid
+import logging
+import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
-# Charger les variables d'environnement
+from utils import is_valid_image
+from image_downloader import download_images
+
+# Logs
+logging.basicConfig(level=logging.INFO)
+
+# Charger variables d'environnement
 load_dotenv()
 
 URL = "https://newsapi.org/v2/top-headlines"
 
 
-def fetch_news():
-    # Charger la clé
+def fetch_news(country="us", page_size=10):
+    """
+    Extraction brute depuis l'API
+    """
     api_key = os.getenv("NEWS_API_KEY")
 
     if not api_key:
-        raise ValueError("NEWS_API_KEY manquante dans le fichier .env")
+        raise ValueError("NEWS_API_KEY manquante")
 
     params = {
         "apiKey": api_key,
-        "country": "us",
-        "pageSize": 10
+        "country": country,
+        "pageSize": page_size
     }
 
     try:
         response = requests.get(URL, params=params, timeout=10)
         response.raise_for_status()
+        data = response.json()
+
+        if data.get("status") != "ok":
+            logging.error(f"Erreur API : {data}")
+            return []
+
+        return data.get("articles", [])
+
     except requests.exceptions.RequestException as e:
-        print("Erreur requête :", e)
+        logging.error(f"Erreur requête : {e}")
         return []
 
-    data = response.json()
 
-    # Vérification API
-    if data.get("status") != "ok":
-        print("Erreur API :", data)
-        return []
-
-    articles = data.get("articles", [])
+def parse_articles(articles):
+    """
+    Nettoyage + structuration
+    """
     cleaned_articles = []
 
     for article in articles:
@@ -57,28 +71,44 @@ def fetch_news():
             "raw_source": "news_api"
         }
 
-        # Filtrer données exploitables
+        # Filtrer contenu exploitable + image valide
         if all([
             cleaned["title"],
             cleaned["text"],
             cleaned["image_url"]
-        ]):
+        ]) and is_valid_image(cleaned["image_url"]):
             cleaned_articles.append(cleaned)
 
     return cleaned_articles
 
 
 def save_to_json(data):
-    os.makedirs("data", exist_ok=True)
+    """
+    Sauvegarde JSON
+    """
+    os.makedirs("data/raw", exist_ok=True)
 
-    filename = f"data/news_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    filename = f"data/raw/news_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
     with open(filename, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4, ensure_ascii=False)
 
+    logging.info(f"Données sauvegardées : {filename}")
+
+
+def main():
+    logging.info(" Début extraction...")
+
+    raw_articles = fetch_news()
+    cleaned_articles = parse_articles(raw_articles)
+
+    # Télécharger images
+    download_images(cleaned_articles)
+
+    save_to_json(cleaned_articles)
+
+    logging.info(f" {len(cleaned_articles)} articles prêts")
+
 
 if __name__ == "__main__":
-    news = fetch_news()
-    save_to_json(news)
-
-    print(f"{len(news)} articles sauvegardés")
+    main()
