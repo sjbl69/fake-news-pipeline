@@ -6,8 +6,8 @@ import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
-from utils import is_valid_image
-from image_downloader import download_images
+from src.extract.utils import is_valid_image
+from src.extract.image_downloader import download_images
 
 # Logs
 logging.basicConfig(level=logging.INFO)
@@ -18,35 +18,45 @@ load_dotenv()
 URL = "https://newsapi.org/v2/top-headlines"
 
 
-def fetch_news(country="us", page_size=10):
+def fetch_news(country="us", page_size=10, max_pages=3):
     """
-    Extraction brute depuis l'API
+    Extraction brute depuis l'API avec pagination
     """
     api_key = os.getenv("NEWS_API_KEY")
 
     if not api_key:
         raise ValueError("NEWS_API_KEY manquante")
 
-    params = {
-        "apiKey": api_key,
-        "country": country,
-        "pageSize": page_size
-    }
+    all_articles = []
 
-    try:
-        response = requests.get(URL, params=params, timeout=10)
-        response.raise_for_status()
-        data = response.json()
+    for page in range(1, max_pages + 1):
+        params = {
+            "apiKey": api_key,
+            "country": country,
+            "pageSize": page_size,
+            "page": page
+        }
 
-        if data.get("status") != "ok":
-            logging.error(f"Erreur API : {data}")
-            return []
+        try:
+            response = requests.get(URL, params=params, timeout=10)
+            response.raise_for_status()
+            data = response.json()
 
-        return data.get("articles", [])
+            if data.get("status") != "ok":
+                logging.error(f"Erreur API : {data}")
+                continue
 
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Erreur requête : {e}")
-        return []
+            articles = data.get("articles", [])
+
+            if not articles:
+                break
+
+            all_articles.extend(articles)
+
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Erreur requête : {e}")
+
+    return all_articles
 
 
 def parse_articles(articles):
@@ -71,7 +81,7 @@ def parse_articles(articles):
             "raw_source": "news_api"
         }
 
-        # Filtrer contenu exploitable + image valide
+        #  Filtrer contenu exploitable + image valide
         if all([
             cleaned["title"],
             cleaned["text"],
@@ -102,7 +112,7 @@ def main():
     raw_articles = fetch_news()
     cleaned_articles = parse_articles(raw_articles)
 
-    # Télécharger images
+    #  Télécharger images 
     download_images(cleaned_articles)
 
     save_to_json(cleaned_articles)
