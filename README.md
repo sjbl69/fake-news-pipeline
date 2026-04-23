@@ -306,4 +306,22 @@ Les sources sélectionnées sont complémentaires :
  Les autres sources servent à enrichir et actualiser le dataset.
 
 ---
+## Étape 2 - Extraction automatisée
 
+### Installation
+pip install -r requirements.txt
+
+Créer un fichier `.env` :
+NEWS_API_KEY=your_key
+
+### Exécution
+python -m src.extract.news_api
+
+### Sortie
+- JSON dans data/raw/
+- Images dans data/raw/images/
+
+### Limites
+- Dépend du quota API
+- Certaines images peuvent être invalides
+- Pagination limitée
