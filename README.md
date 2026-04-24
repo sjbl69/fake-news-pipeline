@@ -338,5 +338,6 @@ Lancement :
 
 ```bash
 python src/transform/pipeline.py
+```
 
-<img width="1645" height="911" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/1a773f83-83f1-4ff6-8b15-83e93e07d974" />
+<img width="1645" height="911" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/099c70d4-2a7e-44bd-af85-fd534194beb1" />
