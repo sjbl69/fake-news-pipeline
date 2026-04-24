@@ -1,9 +1,9 @@
 import os
+import sys
 import json
 import uuid
 import logging
 import requests
-import sys
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
@@ -26,9 +26,8 @@ def fetch_news(country="us", page_size=10, max_pages=3):
     api_key = os.getenv("NEWS_API_KEY")
 
     if not api_key:
-      logging.error(" NEWS_API_KEY manquante dans le fichier .env")
-    sys.exit(1)
-
+        logging.error(" NEWS_API_KEY manquante dans le fichier .env")
+        sys.exit(1)  
 
     all_articles = []
 
@@ -84,7 +83,6 @@ def parse_articles(articles):
             "raw_source": "news_api"
         }
 
-        #  Filtrer contenu exploitable + image valide
         if all([
             cleaned["title"],
             cleaned["text"],
@@ -114,26 +112,13 @@ def main():
 
     raw_articles = fetch_news()
 
-    def main():
-     logging.info(" Début extraction...")
-
-    raw_articles = fetch_news()
-
+    #  arrêt propre si rien récupéré
     if not raw_articles:
         logging.error(" Aucune donnée récupérée. Arrêt du script.")
         return
 
     cleaned_articles = parse_articles(raw_articles)
 
-    # Télécharger images
-    download_images(cleaned_articles)
-
-    save_to_json(cleaned_articles)
-
-    logging.info(f" {len(cleaned_articles)} articles prêts")
-    cleaned_articles = parse_articles(raw_articles)
-
-    #  Télécharger images 
     download_images(cleaned_articles)
 
     save_to_json(cleaned_articles)
