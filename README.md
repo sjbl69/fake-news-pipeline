@@ -325,3 +325,18 @@ python -m src.extract.news_api
 - Dépend du quota API
 - Certaines images peuvent être invalides
 - Pagination limitée
+
+- ## Étape 3 : Pipeline de transformation
+
+Description du pipeline :
+- Nettoyage des textes
+- Validation des articles
+- Normalisation des dates
+- Structuration des données
+
+Lancement :
+
+```bash
+python src/transform/pipeline.py
+
+<img width="1645" height="911" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/1a773f83-83f1-4ff6-8b15-83e93e07d974" />
