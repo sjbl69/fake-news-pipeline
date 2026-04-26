@@ -341,3 +341,134 @@ python src/transform/pipeline.py
 ```
 
 <img width="1645" height="911" alt="mermaid-diagram" src="https://github.com/user-attachments/assets/099c70d4-2a7e-44bd-af85-fd534194beb1" />
+
+
+#  Étape 4 : Orchestration du pipeline avec Airflow
+
+##  Objectif
+
+Mettre en place un pipeline ETL automatisé et orchestré afin de :
+
+- Automatiser les étapes de traitement des données
+- Structurer le flux de données
+- Superviser les exécutions
+- Garantir la reproductibilité du pipeline
+
+---
+
+##  Architecture du pipeline
+
+Le pipeline est composé de trois tâches principales :
+
+###  extract_task
+- Récupération des données via News API
+- Vérification de la validité des données
+- Sauvegarde dans `data/raw/raw_data.json`
+
+---
+
+###  transform_task
+- Nettoyage des textes
+- Normalisation des champs
+- Structuration des données
+- Sauvegarde dans `data/processed/clean_data.json`
+
+---
+
+###  load_task
+- Simulation du chargement des données
+- Préparation pour une future base de données ou modèle de machine learning
+
+---
+
+##  Ordonnancement des tâches
+
+Les tâches sont exécutées dans l’ordre suivant : extract_task → transform_task → load_task
+
+
+Si une tâche échoue, les suivantes ne sont pas exécutées.
+
+---
+
+##  Implémentation technique
+
+Le DAG est défini dans le fichier : dags/etl_pipeline.py
+
+
+Le pipeline utilise :
+
+- PythonOperator pour exécuter les fonctions Python
+- Un DAG Airflow pour définir les dépendances et la planification
+
+Configuration du DAG :
+
+```python
+dag = DAG(
+    dag_id="etl_multimodal_pipeline",
+    schedule_interval="0 2 * * *",
+    catchup=False
+)
+
+Monitoring
+
+Airflow permet :
+
+Visualisation des DAGs
+Suivi des exécutions en temps réel
+Accès aux logs détaillés
+Identification rapide des erreurs
+
+Interface disponible sur :
+
+http://localhost:8080
+
+Gestion des erreurs
+Vérification de la présence de la clé API (NEWS_API_KEY)
+Arrêt du pipeline si aucune donnée n’est récupérée
+Logs explicites pour faciliter le debug
+
+ ##  Variables d’environnement
+
+
+Créer un fichier .env :
+
+NEWS_API_KEY=your_api_key
+
+Ce fichier est exclu du dépôt via .gitignore.
+
+Lancer le pipeline
+
+Démarrer Airflow :
+
+airflow standalone
+
+Puis lancer le DAG via l’interface web.
+
+Lancer le pipeline
+
+Démarrer Airflow :
+
+airflow standalone
+
+Puis lancer le DAG via l’interface web.
+
+Gestion des données
+
+Les données sont organisées en trois niveaux :
+
+data/raw/ : données brutes
+data/processed/ : données transformées
+data/final/ : données prêtes à être utilisées
+
+Résultat
+
+Le pipeline est :
+
+Fonctionnel
+Automatisé
+Reproductible
+Supervisé via Airflow
+
+Les trois tâches (extract, transform, load) s’exécutent correctement et produisent des données exploitables.
+
+
