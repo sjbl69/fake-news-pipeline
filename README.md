@@ -409,7 +409,9 @@ dag = DAG(
     catchup=False
 )
 
-Monitoring
+```
+
+## Monitoring
 
 Airflow permet :
 
