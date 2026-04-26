@@ -1,7 +1,16 @@
-.env
-.venv/
+# Python
 __pycache__/
 *.pyc
 
-data/raw/*
-!data/raw/.gitkeep
+# Environnement
+.venv/
+venv/
+
+# Airflow
+airflow/
+
+# Données
+data/
+
+# OS
+.DS_Store
