@@ -462,4 +462,92 @@ Supervisé via Airflow
 
 Les trois tâches (extract, transform, load) s’exécutent correctement et produisent des données exploitables.
 
+##  Étape 5 — Évaluation et visualisation des performances
+
+###  Objectif
+
+L’objectif de cette étape est d’évaluer l’efficacité du pipeline ETL à l’aide d’indicateurs de performance (KPI), puis de mettre en place un système de visualisation et de monitoring pour suivre son comportement en production.
+
+---
+
+###  Indicateurs de performance (KPI)
+
+Les KPI suivants ont été définis :
+
+* **Précision des données (%)** : proportion de données valides après transformation
+* **Volume de données** : nombre total d’entrées traitées
+* **Temps d’exécution (s)** : estimation du temps nécessaire au traitement
+* **Coût estimé (€)** : approximation du coût en fonction du volume de données
+
+Ces indicateurs permettent d’évaluer la qualité, la performance et la scalabilité du pipeline.
+
+---
+
+###  Tableau de bord (Streamlit)
+
+Un dashboard interactif a été développé avec **Streamlit** pour visualiser les KPI en temps réel.
+
+Fonctionnalités :
+
+* Affichage des KPI principaux (volume, validité, temps, coût)
+* Visualisation graphique de la répartition des données (valides vs invalides)
+* Aperçu des données traitées
+* Gestion du cas où aucune donnée n’est disponible
+
+Lancement du dashboard :
+
+```bash
+python -m streamlit run dashboard/app.py
+```
+
+---
+
+###  Plan de monitoring
+
+Un plan de monitoring a été mis en place afin d’assurer le suivi du pipeline en production.
+
+####  Surveillance des KPI
+
+* **Qualité des données** : alerte si < 90% de données valides
+* **Performance** : alerte si le temps d’exécution dépasse un seuil critique
+* **Volume** : détection d’anomalies dans les données traitées
+
+---
+
+####  Logs
+
+Le pipeline génère des logs permettant de tracer :
+
+* le début et la fin des tâches
+* le nombre de données traitées
+* les erreurs éventuelles
+
+---
+
+####  Gestion des alertes
+
+Des alertes peuvent être déclenchées en cas de :
+
+* absence de données
+* taux de validité trop faible
+* échec d’une étape du pipeline
+
+---
+
+####  Fréquence de monitoring
+
+* Vérification à chaque exécution du pipeline
+* Analyse régulière des KPI
+* Surveillance continue en environnement de production
+
+---
+
+###  Remarque
+
+Dans cette version, certaines métriques (temps et coût) sont simulées afin de valider la structure du monitoring.
+Le pipeline est conçu pour permettre une intégration future avec des métriques réelles (logs détaillés, Airflow, outils de monitoring).
+
+---
+
+
 
