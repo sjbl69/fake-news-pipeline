@@ -446,15 +446,8 @@ airflow standalone
 
 Puis lancer le DAG via l’interface web.
 
-Lancer le pipeline
 
-Démarrer Airflow :
-
-airflow standalone
-
-Puis lancer le DAG via l’interface web.
-
-Gestion des données
+## Gestion des données
 
 Les données sont organisées en trois niveaux :
 
@@ -462,7 +455,7 @@ data/raw/ : données brutes
 data/processed/ : données transformées
 data/final/ : données prêtes à être utilisées
 
-Résultat
+## Résultat
 
 Le pipeline est :
 
