@@ -432,17 +432,13 @@ Logs explicites pour faciliter le debug
  ##  Variables d’environnement
 
 
-Créer un fichier .env :
-
-NEWS_API_KEY=your_api_key
+Créer un fichier .env : NEWS_API_KEY=your_api_key
 
 Ce fichier est exclu du dépôt via .gitignore.
 
 Lancer le pipeline
 
-Démarrer Airflow :
-
-airflow standalone
+Démarrer Airflow : airflow standalone
 
 Puis lancer le DAG via l’interface web.
 
